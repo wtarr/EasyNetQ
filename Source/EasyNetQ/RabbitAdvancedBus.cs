@@ -231,34 +231,34 @@ namespace EasyNetQ
             MessageReturned -= advancedBusEventHandlers.MessageReturned;
         }
 
-        private void OnConnectionCreated(ConnectionCreatedEvent @event)
+        private void OnConnectionCreated(in ConnectionCreatedEvent @event)
         {
             Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
         }
 
-        private void OnConnectionRecovered(ConnectionRecoveredEvent @event)
+        private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
         {
             Connected?.Invoke(this, new ConnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port));
         }
 
-        private void OnConnectionDisconnected(ConnectionDisconnectedEvent @event)
+        private void OnConnectionDisconnected(in ConnectionDisconnectedEvent @event)
         {
             Disconnected?.Invoke(
                 this, new DisconnectedEventArgs(@event.Endpoint.HostName, @event.Endpoint.Port, @event.Reason)
             );
         }
 
-        private void OnConnectionBlocked(ConnectionBlockedEvent @event)
+        private void OnConnectionBlocked(in ConnectionBlockedEvent @event)
         {
             Blocked?.Invoke(this, new BlockedEventArgs(@event.Reason));
         }
 
-        private void OnConnectionUnblocked(ConnectionUnblockedEvent @event)
+        private void OnConnectionUnblocked(in ConnectionUnblockedEvent @event)
         {
             Unblocked?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnMessageReturned(ReturnedMessageEvent @event)
+        private void OnMessageReturned(in ReturnedMessageEvent @event)
         {
             MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
         }

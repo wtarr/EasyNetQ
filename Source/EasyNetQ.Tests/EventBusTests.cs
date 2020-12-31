@@ -9,7 +9,7 @@ namespace EasyNetQ.Tests
 {
     public class EventBusTests
     {
-        private IEventBus eventBus;
+        private readonly IEventBus eventBus;
 
         public EventBusTests()
         {
@@ -21,7 +21,7 @@ namespace EasyNetQ.Tests
         {
             Event1 capturedEvent = null;
 
-            eventBus.Subscribe<Event1>(@event => capturedEvent = @event);
+            eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
 
             var publishedEvent = new Event1
             {
@@ -39,7 +39,7 @@ namespace EasyNetQ.Tests
         {
             Event1 capturedEvent = null;
 
-            eventBus.Subscribe<Event1>(@event => capturedEvent = @event);
+            eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
 
             var publishedEvent = new Event2
             {
@@ -56,7 +56,7 @@ namespace EasyNetQ.Tests
         {
             var stringsPublished = new List<string>();
 
-            var subscription = eventBus.Subscribe<string>(stringsPublished.Add);
+            var subscription = eventBus.Subscribe((in string s) => stringsPublished.Add(s));
             subscription.Should().NotBeNull();
 
             eventBus.Publish("Before cancellation");
@@ -74,10 +74,10 @@ namespace EasyNetQ.Tests
         {
             Event1 eventFromSubscription = null;
 
-            eventBus.Subscribe<Event1>(@event =>
+            eventBus.Subscribe((in Event1 @event) =>
                 {
                     eventFromSubscription = @event;
-                    eventBus.Subscribe<Event1>(x => { });
+                    eventBus.Subscribe((in Event1 _) => { });
                 });
 
             var publishedEvent1 = new Event1
@@ -97,7 +97,7 @@ namespace EasyNetQ.Tests
 
             IDisposable subscription = null;
 
-            subscription = eventBus.Subscribe<Event1>(@event =>
+            subscription = eventBus.Subscribe((in Event1 @event) =>
             {
                 subscription.Dispose();
                 eventFromSubscription = @event;

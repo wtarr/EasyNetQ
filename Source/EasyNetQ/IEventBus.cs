@@ -5,6 +5,9 @@ using EasyNetQ.Logging;
 
 namespace EasyNetQ
 {
+    /// <inheritdoc />
+    public delegate void Handler<TEvent>(in TEvent @event);
+
     /// <summary>
     ///     An internal pub-sub bus to distribute events within EasyNetQ
     /// </summary>
@@ -15,7 +18,7 @@ namespace EasyNetQ
         /// </summary>
         /// <param name="event">The event</param>
         /// <typeparam name="TEvent">The event type</typeparam>
-        void Publish<TEvent>(TEvent @event);
+        void Publish<TEvent>(in TEvent @event);
 
         /// <summary>
         ///     Subscribes to the event type
@@ -23,7 +26,7 @@ namespace EasyNetQ
         /// <param name="handler">The event handler</param>
         /// <typeparam name="TEvent">The event type</typeparam>
         /// <returns>Unsubscription disposable</returns>
-        IDisposable Subscribe<TEvent>(Action<TEvent> handler);
+        IDisposable Subscribe<TEvent>(Handler<TEvent> handler);
     }
 
     /// <inheritdoc />
@@ -32,7 +35,7 @@ namespace EasyNetQ
         private readonly ConcurrentDictionary<Type, object> subscriptions = new ConcurrentDictionary<Type, object>();
 
         /// <inheritdoc />
-        public void Publish<TEvent>(TEvent @event)
+        public void Publish<TEvent>(in TEvent @event)
         {
             if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
                 return;
@@ -41,7 +44,7 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IDisposable Subscribe<TEvent>(Action<TEvent> handler)
+        public IDisposable Subscribe<TEvent>(Handler<TEvent> handler)
         {
             var handlers = (Handlers<TEvent>)subscriptions.GetOrAdd(typeof(TEvent), _ => new Handlers<TEvent>());
             handlers.Add(handler);
@@ -52,35 +55,35 @@ namespace EasyNetQ
         {
             private readonly ILog log = LogProvider.For<Handlers<TEvent>>();
             private readonly object mutex = new object();
-            private volatile List<Action<TEvent>> handlers = new List<Action<TEvent>>();
+            private volatile List<Handler<TEvent>> handlers = new List<Handler<TEvent>>();
 
-            public void Add(Action<TEvent> handler)
+            public void Add(Handler<TEvent> handler)
             {
                 lock (mutex)
                 {
-                    var newHandlers = new List<Action<TEvent>>(handlers);
+                    var newHandlers = new List<Handler<TEvent>>(handlers);
                     newHandlers.Add(handler);
                     handlers = newHandlers;
                 }
             }
 
-            public void Remove(Action<TEvent> handler)
+            public void Remove(Handler<TEvent> handler)
             {
                 lock (mutex)
                 {
-                    var newHandlers = new List<Action<TEvent>>(handlers);
+                    var newHandlers = new List<Handler<TEvent>>(handlers);
                     newHandlers.Remove(handler);
                     handlers = newHandlers;
                 }
             }
 
-            public void Handle(TEvent @event)
+            public void Handle(in TEvent @event)
             {
                 // ReSharper disable once InconsistentlySynchronizedField
                 foreach (var handler in handlers)
                     try
                     {
-                        handler(@event);
+                        handler(in @event);
                     }
                     catch (Exception exception)
                     {
@@ -92,9 +95,9 @@ namespace EasyNetQ
         private sealed class Subscription<TEvent> : IDisposable
         {
             private readonly Handlers<TEvent> handlers;
-            private readonly Action<TEvent> handler;
+            private readonly Handler<TEvent> handler;
 
-            public Subscription(Handlers<TEvent> handlers, Action<TEvent> handler)
+            public Subscription(Handlers<TEvent> handlers, Handler<TEvent> handler)
             {
                 this.handlers = handlers;
                 this.handler = handler;

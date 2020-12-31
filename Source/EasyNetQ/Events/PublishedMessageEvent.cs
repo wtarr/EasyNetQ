@@ -5,7 +5,7 @@ namespace EasyNetQ.Events
     /// <summary>
     ///     This event is raised after a message is published
     /// </summary>
-    public class PublishedMessageEvent
+    public readonly struct PublishedMessageEvent
     {
         /// <summary>
         ///     Creates PublishedMessageEvent
@@ -14,7 +14,7 @@ namespace EasyNetQ.Events
         /// <param name="routingKey">The routing key</param>
         /// <param name="properties">The properties</param>
         /// <param name="body">The body</param>
-        public PublishedMessageEvent(string exchangeName, string routingKey, MessageProperties properties, ReadOnlyMemory<byte> body)
+        public PublishedMessageEvent(string exchangeName, string routingKey, MessageProperties properties, in ReadOnlyMemory<byte> body)
         {
             ExchangeName = exchangeName;
             RoutingKey = routingKey;
