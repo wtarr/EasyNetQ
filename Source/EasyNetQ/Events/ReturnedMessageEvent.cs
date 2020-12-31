@@ -15,7 +15,7 @@ namespace EasyNetQ.Events
         /// <param name="body">The message body</param>
         /// <param name="properties">The message properties</param>
         /// <param name="info">The returned message info</param>
-        public ReturnedMessageEvent(IModel channel, in ReadOnlyMemory<byte> body, MessageProperties properties, MessageReturnedInfo info)
+        public ReturnedMessageEvent(IModel channel, in ReadOnlyMemory<byte> body, MessageProperties properties, in MessageReturnedInfo info)
         {
             Channel = channel;
             Body = body;
