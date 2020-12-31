@@ -1,9 +1,9 @@
-using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer
 {
@@ -28,18 +28,33 @@ namespace EasyNetQ.Producer
         }
 
         /// <inheritdoc />
-        public Task<T> InvokeAsync<T>(
-            Func<IModel, T> channelAction, ChannelDispatchOptions channelOptions, CancellationToken cancellationToken
-        )
+        public Task<TResult> InvokeAsync<TResult, TCommand>(
+           TCommand command, ChannelDispatchOptions options, CancellationToken cancellationToken = default
+        ) where TCommand : IClientCommand<TResult>
         {
-            Preconditions.CheckNotNull(channelAction, "channelAction");
-
             // TODO createChannelFactory could be called multiple time, fix it
-            var channel = channelPerOptions.GetOrAdd(channelOptions, createChannelFactory);
-            return channel.InvokeChannelActionAsync(channelAction, cancellationToken);
+            var channel = channelPerOptions.GetOrAdd(options, createChannelFactory);
+            return channel.InvokeChannelActionAsync<TResult, PersistentChannelActionProxy<TResult, TCommand>>(
+                new PersistentChannelActionProxy<TResult, TCommand>(command), cancellationToken
+            );
         }
 
         /// <inheritdoc />
         public void Dispose() => channelPerOptions.ClearAndDispose();
+
+        private readonly struct PersistentChannelActionProxy<TResult, TCommand> : IPersistentChannelAction<TResult> where TCommand : IClientCommand<TResult>
+        {
+            private readonly TCommand command;
+
+            public PersistentChannelActionProxy(in TCommand command)
+            {
+                this.command = command;
+            }
+
+            public TResult Invoke(IModel model)
+            {
+                return command.Invoke(model);
+            }
+        }
     }
 }

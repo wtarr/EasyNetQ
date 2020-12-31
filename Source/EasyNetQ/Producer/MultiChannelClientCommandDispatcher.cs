@@ -44,22 +44,37 @@ namespace EasyNetQ.Producer
         }
 
         /// <inheritdoc />
-        public async Task<T> InvokeAsync<T>(
-            Func<IModel, T> channelAction, ChannelDispatchOptions options, CancellationToken cancellationToken
-        )
+        public async Task<TResult> InvokeAsync<TResult, TCommand>(
+            TCommand command, ChannelDispatchOptions options, CancellationToken cancellationToken = default
+        ) where TCommand : IClientCommand<TResult>
         {
-            Preconditions.CheckNotNull(channelAction, "channelAction");
-
             // TODO channelsPoolFactory could be called multiple time, fix it
             var channelsPool = channelsPoolPerOptions.GetOrAdd(options, channelsPoolFactory);
             var channel = await channelsPool.DequeueAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                return await channel.InvokeChannelActionAsync(channelAction, cancellationToken).ConfigureAwait(false);
+                return await channel.InvokeChannelActionAsync<TResult, PersistentChannelActionProxy<TResult, TCommand>>(
+                    new PersistentChannelActionProxy<TResult, TCommand>(command), cancellationToken
+                );
             }
             finally
             {
                 channelsPool.Enqueue(channel);
+            }
+        }
+
+        private readonly struct PersistentChannelActionProxy<TResult, TCommand> : IPersistentChannelAction<TResult> where TCommand : IClientCommand<TResult>
+        {
+            private readonly TCommand command;
+
+            public PersistentChannelActionProxy(in TCommand command)
+            {
+                this.command = command;
+            }
+
+            public TResult Invoke(IModel model)
+            {
+                return command.Invoke(model);
             }
         }
     }

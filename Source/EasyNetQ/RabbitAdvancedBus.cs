@@ -355,12 +355,9 @@ namespace EasyNetQ
             }
             else
             {
-                await clientCommandDispatcher.InvokeAsync(model =>
-                {
-                    var properties = model.CreateBasicProperties();
-                    rawMessage.Properties.CopyTo(properties);
-                    model.BasicPublish(exchange.Name, routingKey, mandatory, properties, rawMessage.Body);
-                }, ChannelDispatchOptions.Publish, cts.Token).ConfigureAwait(false);
+                await clientCommandDispatcher.InvokeAsync(
+                    new PublishWithoutConfirmsCommand(exchange, routingKey, mandatory, rawMessage), ChannelDispatchOptions.Publish, cts.Token
+                ).ConfigureAwait(false);
             }
 
             eventBus.Publish(

@@ -47,6 +47,11 @@ namespace EasyNetQ.Producer
         public bool PublisherConfirms { get; }
     }
 
+    public interface IClientCommand<out TResult>
+    {
+        TResult Invoke(IModel model);
+    }
+
     /// <summary>
     ///     Responsible for invoking client commands.
     /// </summary>
@@ -55,13 +60,14 @@ namespace EasyNetQ.Producer
         /// <summary>
         /// Invokes a command on top of model
         /// </summary>
-        /// <param name="channelAction"></param>
-        /// <param name="channelOptions"></param>
+        /// <param name="command"></param>
+        /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <typeparam name="TCommand"></typeparam>
         /// <returns></returns>
-        Task<T> InvokeAsync<T>(
-            Func<IModel, T> channelAction, ChannelDispatchOptions channelOptions, CancellationToken cancellationToken = default
-        );
+        Task<TResult> InvokeAsync<TResult, TCommand>(
+            TCommand command, ChannelDispatchOptions options, CancellationToken cancellationToken = default
+        ) where TCommand : IClientCommand<TResult>;
     }
 }

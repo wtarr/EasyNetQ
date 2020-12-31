@@ -6,7 +6,18 @@ using RabbitMQ.Client;
 namespace EasyNetQ.Producer
 {
     /// <summary>
-    /// An abstraction on top of channel which manages its persistence and invokes an action on it
+    ///     An abstract action which runs on top of channel
+    /// </summary>
+    public interface IPersistentChannelAction<out TResult>
+    {
+        /// <summary>
+        ///     Invokes the action
+        /// </summary>
+        TResult Invoke(IModel model);
+    }
+
+    /// <summary>
+    ///     An abstraction on top of channel which manages its persistence and invokes an action on it
     /// </summary>
     public interface IPersistentChannel : IDisposable
     {
@@ -15,6 +26,8 @@ namespace EasyNetQ.Producer
         /// </summary>
         /// <param name="channelAction">The action to invoke</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        Task<T> InvokeChannelActionAsync<T>(Func<IModel, T> channelAction, CancellationToken cancellationToken = default);
+        Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
+            TChannelAction channelAction, CancellationToken cancellationToken = default
+        ) where TChannelAction : IPersistentChannelAction<TResult>;
     }
 }
