@@ -364,7 +364,7 @@ namespace EasyNetQ
             }
 
             eventBus.Publish(
-                new PublishedMessageEvent(exchange.Name, routingKey, rawMessage.Properties, rawMessage.Body)
+                new PublishedMessageEvent(exchange, routingKey, rawMessage.Properties, rawMessage.Body)
             );
 
             if (logger.IsDebugEnabled())

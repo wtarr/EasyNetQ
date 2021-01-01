@@ -51,7 +51,7 @@ namespace EasyNetQ
     {
         public static IConsumeConfiguration ForQueue(
             this IConsumeConfiguration configuration,
-            Queue queue,
+            in Queue queue,
             MessageHandler handler
         )
         {
@@ -61,7 +61,7 @@ namespace EasyNetQ
 
         public static IConsumeConfiguration ForQueue(
             this IConsumeConfiguration configuration,
-            Queue queue,
+            in Queue queue,
             Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler
         )
         {
@@ -71,7 +71,7 @@ namespace EasyNetQ
 
         public static IConsumeConfiguration ForQueue(
             this IConsumeConfiguration configuration,
-            Queue queue,
+            in Queue queue,
             Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler,
             Action<IPerQueueConsumeConfiguration> configure
         )
