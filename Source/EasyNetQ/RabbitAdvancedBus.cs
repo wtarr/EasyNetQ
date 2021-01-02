@@ -177,14 +177,14 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public IPullingConsumer<PullResult> CreatePullingConsumer(Queue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult> CreatePullingConsumer(in Queue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer(queue, options);
         }
 
         /// <inheritdoc />
-        public IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(Queue queue, bool autoAck = true)
+        public IPullingConsumer<PullResult<T>> CreatePullingConsumer<T>(in Queue queue, bool autoAck = true)
         {
             var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
             return pullingConsumerFactory.CreateConsumer<T>(queue, options);
