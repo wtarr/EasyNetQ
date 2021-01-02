@@ -35,13 +35,13 @@ namespace EasyNetQ
 
     internal class ConsumeConfiguration : IConsumeConfiguration
     {
-        private readonly Func<Queue, IHandlerCollection> createHandlerCollection;
+        private readonly IHandlerCollectionFactory handlerCollectionFactory;
 
         public ConsumeConfiguration(
-            ushort defaultPrefetchCount, Func<Queue, IHandlerCollection> createHandlerCollection
+            ushort defaultPrefetchCount, IHandlerCollectionFactory handlerCollectionFactory
         )
         {
-            this.createHandlerCollection = createHandlerCollection;
+            this.handlerCollectionFactory = handlerCollectionFactory;
             PrefetchCount = defaultPrefetchCount;
             PerQueueConsumeConfigurations = new List<Tuple<Queue, MessageHandler, PerQueueConsumeConfiguration>>();
             PerQueueTypedConsumeConfigurations =
@@ -76,7 +76,7 @@ namespace EasyNetQ
             in Queue queue, Action<IHandlerRegistration> register, Action<IPerQueueConsumeConfiguration> configure
         )
         {
-            var handlerCollection = createHandlerCollection(queue);
+            var handlerCollection = handlerCollectionFactory.CreateHandlerCollection(queue);
             register(handlerCollection);
             var perQueueConsumeConfiguration = new PerQueueConsumeConfiguration();
             configure(perQueueConsumeConfiguration);

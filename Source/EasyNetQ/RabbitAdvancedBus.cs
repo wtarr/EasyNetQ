@@ -103,7 +103,7 @@ namespace EasyNetQ
             Preconditions.CheckNotNull(configure, "configure");
 
             var consumeConfiguration = new ConsumeConfiguration(
-                configuration.PrefetchCount, handlerCollectionFactory.CreateHandlerCollection
+                configuration.PrefetchCount, handlerCollectionFactory
             );
             configure(consumeConfiguration);
 

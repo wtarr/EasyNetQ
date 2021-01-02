@@ -322,7 +322,7 @@ namespace EasyNetQ
         /// <param name="interceptor">The produce-consumer interceptor</param>
         public PullingConsumer(
             PullingConsumerOptions options,
-            Queue queue,
+            in Queue queue,
             IPersistentChannel channel,
             IProduceConsumeInterceptor interceptor
         )
