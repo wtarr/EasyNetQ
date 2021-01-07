@@ -19,7 +19,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_be_able_to_get_subscribed_to_events()
         {
-            Event1 capturedEvent = null;
+            Event1? capturedEvent = null;
 
             eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
 
@@ -37,7 +37,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_not_get_events_not_subscribed_to()
         {
-            Event1 capturedEvent = null;
+            Event1? capturedEvent = null;
 
             eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
 
@@ -54,25 +54,25 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_be_able_to_cancel_an_event()
         {
-            var stringsPublished = new List<string>();
+            var published = new List<Event1>();
 
-            var subscription = eventBus.Subscribe((in string s) => stringsPublished.Add(s));
+            var subscription = eventBus.Subscribe((in Event1 s) => published.Add(s));
             subscription.Should().NotBeNull();
 
-            eventBus.Publish("Before cancellation");
+            eventBus.Publish(new Event1 { Text = "Before cancellation" });
 
             subscription.Dispose();
 
-            eventBus.Publish("Hello World");
+            eventBus.Publish(new Event1 { Text = "Hello World" });
 
-            stringsPublished.Count.Should().Be(1);
-            stringsPublished[0].Should().Be("Before cancellation");
+            published.Count.Should().Be(1);
+            published[0].Should().Be("Before cancellation");
         }
 
         [Fact]
         public void Should_handle_resubscription_from_handler()
         {
-            Event1 eventFromSubscription = null;
+            Event1? eventFromSubscription = null;
 
             eventBus.Subscribe((in Event1 @event) =>
                 {
@@ -93,7 +93,7 @@ namespace EasyNetQ.Tests
         [Fact]
         public void Should_handle_cancelation_from_handler()
         {
-            Event1 eventFromSubscription = null;
+            Event1? eventFromSubscription = null;
 
             IDisposable subscription = null;
 
@@ -113,12 +113,12 @@ namespace EasyNetQ.Tests
             eventFromSubscription.Should().NotBeNull();
         }
 
-        private class Event1
+        private struct Event1
         {
             public string Text { get; set; }
         }
 
-        private class Event2
+        private struct Event2
         {
             public string Text { get; set; }
         }
