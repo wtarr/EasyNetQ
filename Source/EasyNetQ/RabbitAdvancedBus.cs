@@ -191,19 +191,19 @@ namespace EasyNetQ
         }
 
         /// <inheritdoc />
-        public event System.EventHandler<ConnectedEventArgs> Connected;
+        public event EventHandler<ConnectedEventArgs> Connected;
 
         /// <inheritdoc />
-        public event System.EventHandler<DisconnectedEventArgs> Disconnected;
+        public event EventHandler<DisconnectedEventArgs> Disconnected;
 
         /// <inheritdoc />
-        public event System.EventHandler<BlockedEventArgs> Blocked;
+        public event EventHandler<BlockedEventArgs> Blocked;
 
         /// <inheritdoc />
         public event EventHandler Unblocked;
 
         /// <inheritdoc />
-        public event System.EventHandler<MessageReturnedEventArgs> MessageReturned;
+        public event EventHandler<MessageReturnedEventArgs> MessageReturned;
 
         /// <inheritdoc />
         public bool IsConnected => connection.IsConnected;
