@@ -35,7 +35,7 @@ namespace EasyNetQ.Consumer
             this.eventBus = eventBus;
 
             unsubscribeFromStoppedConsumerEvent = eventBus.Subscribe(
-                delegate (in StoppedConsumingEvent @event) { consumers.Remove(@event.Consumer.Id); }
+                (in StoppedConsumingEvent @event) => consumers.Remove(@event.Consumer.Id)
             );
         }
 
