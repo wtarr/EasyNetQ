@@ -30,8 +30,7 @@ namespace EasyNetQ.Tests
 
             eventBus.Publish(publishedEvent);
 
-            capturedEvent.Should().NotBeNull();
-            capturedEvent.Should().BeSameAs(publishedEvent);
+            capturedEvent.Should().Be(publishedEvent);
         }
 
         [Fact]
@@ -59,14 +58,15 @@ namespace EasyNetQ.Tests
             var subscription = eventBus.Subscribe((in Event1 s) => published.Add(s));
             subscription.Should().NotBeNull();
 
-            eventBus.Publish(new Event1 { Text = "Before cancellation" });
+            var publishedEvent = new Event1 { Text = "Before cancellation" };
+            eventBus.Publish(publishedEvent);
 
             subscription.Dispose();
 
             eventBus.Publish(new Event1 { Text = "Hello World" });
 
             published.Count.Should().Be(1);
-            published[0].Should().Be("Before cancellation");
+            published[0].Should().Be(publishedEvent);
         }
 
         [Fact]
