@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using EasyNetQ.Internals;
+using System.Text.RegularExpressions;
 
 namespace EasyNetQ
 {
@@ -77,7 +78,34 @@ namespace EasyNetQ
             if (clusterIdPresent) basicProperties.ClusterId = clusterId;
 
             if (headers != null && headers.Count > 0)
-                basicProperties.Headers = new Dictionary<string, object>(headers);
+            {
+                basicProperties.Headers = new Dictionary<string, object>();
+
+                foreach (var kv in headers)
+                {
+                    var key = kv.Key;
+                    var val = kv.Value;
+
+                    if (val is string str)
+                    {
+                        if (IsBase64String(str))
+                        {
+                            var bytes = Convert.FromBase64String(str);
+                            var original = Encoding.UTF8.GetString(bytes);
+
+                            basicProperties.Headers.Add(key, original);
+                        }
+                        else
+                        {
+                            basicProperties.Headers.Add(key, val);
+                        }
+                    }
+                    else
+                    {
+                        basicProperties.Headers.Add(key, val);
+                    }
+                }
+            }
         }
 
         /// <inheritdoc />
@@ -378,6 +406,13 @@ namespace EasyNetQ
             }
 
             return input;
+        }
+
+        // https://stackoverflow.com/a/8571649
+        public static bool IsBase64String(string base64)
+        {
+            Regex re = new Regex("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$");
+            return re.IsMatch(base64);            
         }
     }
 }
